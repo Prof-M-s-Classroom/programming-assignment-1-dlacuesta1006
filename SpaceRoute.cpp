@@ -1,17 +1,8 @@
+#include "SpaceRoute.h"
+
 #include <iostream>
 #include <string>
 using namespace std;
-
-template <typename T>
-class Node {
-public:
-    T& data;
-    Node* next;
-    Node* prev;
-
-    Node(T& d) : data(d), next(nullptr), prev(nullptr) {}
-    void print() { cout << data << " "; }
-};
 
 class CelestialNode {
 private:
@@ -27,35 +18,163 @@ public:
     void print() const { cout << name << " (" << distance_from_earth << " AU) - " << mission_log << endl; }
 };
 
+
 template <typename T>
-class SpaceRoute {
-private:
-    Node<T>* head;
-    Node<T>* tail;
+SpaceRoute<T>::~SpaceRoute() {
+    Node<T>* current = head;
+    while (current != nullptr) {
+        Node<T>* next = current -> next;
+        delete current;
+        current = next;
+    }
+}
 
-public:
-    SpaceRoute();  // Constructor
-    ~SpaceRoute(); // Destructor
+template<typename T>
+void SpaceRoute<T>::addWaypointAtBeginning(T &data) {
+    Node<T>* newNode = new Node<T>(data);
+    if (head == nullptr) {
+        head = tail = newNode;
+    } else {
+        newNode -> next = head;
+        head -> prev = newNode;
+        head = newNode;
+    }
+}
 
-    void addWaypointAtBeginning(T& data);
-    void addWaypointAtEnd(T& data);
-    void addWaypointAtIndex(int index, T& data);
-    void removeWaypointAtBeginning();
-    void removeWaypointAtEnd();
-    void removeWaypointAtIndex(int index);
-    void traverseForward();
-    void traverseBackward();
-    Node<T>* getWaypoint(int index);
-    void setWaypoint(int index, T& data);
-    void print(){
+template<typename T>
+void SpaceRoute<T>::addWaypointAtEnd(T &data) {
+    Node<T>* newNode = new Node<T>(data);
+    if (tail == nullptr) {
+        head = tail = newNode;
+    } else {
+        tail -> next = newNode;
+        tail -> prev = tail;
+        tail = newNode;
+    }
+}
 
-            Node<T>* current = head;
-            while (current) {
-                current->print();
-                current = current->next;
-            }
-            cout << endl;
-        }
+template<typename T>
+void SpaceRoute<T>::addWaypointAtIndex(int index, T &data) {
+    if (index == 0) {
+        addWaypointAtBeginning(data);
+        return;
+    }
+    Node<T>* current = head;
+    int count = 0;
+    while (current != nullptr && count < index - 1) {
+        current = current -> next;
+        count++;
+    }
+    if (current == nullptr) return;
+    Node<T>* newNode = new Node<T>(data);
+    newNode -> next = current -> next;
+    if (current -> next != nullptr) {
+        current -> next -> prev = newNode;
+    }
+    current -> next = newNode;
+    newNode -> prev = current;
+    if (newNode -> next == nullptr) {
+        tail = newNode;
+    }
+}
 
-};
+template<typename T>
+void SpaceRoute<T>::removeWaypointAtBeginning() {
+    if (head == nullptr) return;
+    Node<T>* temp = head;
+    head = head -> next;
+    if (head != nullptr) head -> prev = nullptr;
+    else tail = nullptr;
+    delete temp;
+}
+
+template<typename T>
+void SpaceRoute<T>::removeWaypointAtEnd() {
+    if (tail == nullptr) return;
+    Node<T>* temp = tail;
+    tail = tail -> prev;
+    if (tail != nullptr) tail -> next = nullptr;
+    else head = nullptr;
+    delete temp;
+}
+
+template<typename T>
+void SpaceRoute<T>::removeWaypointAtIndex(int index) {
+    if (index == 0) {
+        removeWaypointAtBeginning();
+        return;
+    }
+    Node<T>* current = head;
+    int count = 0;
+    while (current != nullptr && count < index) {
+        current = current -> next;
+        count++;
+    }
+    if (current == nullptr) return;
+    if (current -> prev != nullptr) {
+        current -> prev -> next = current -> next;
+    }
+    if (current -> next != nullptr) {
+        current -> next -> prev = current -> prev;
+    }
+    if (current == tail) {
+        tail = current -> prev;
+    }
+    delete current;
+}
+
+template<typename T>
+void SpaceRoute<T>::traverseForward() {
+    Node<T>* current = head;
+    while (current != nullptr) {
+        cout<< current -> data << " -> ";
+        current = current -> next;
+    }
+    cout << "Finished" << endl;
+}
+
+template<typename T>
+void SpaceRoute<T>::traverseBackward() {
+    Node<T>* current = tail;
+    while (current !=nullptr) {
+        cout << current -> data << " <- ";
+        current = current -> prev;
+    }
+    cout << "Started" << endl;
+}
+
+template<typename T>
+Node<T> *SpaceRoute<T>::getWaypoint(int index) {
+    Node<T>* current = head;
+    int count = 0;
+    while (current != nullptr && count < index) {
+        current = current -> next;
+        count++;
+    }
+    return current;
+}
+
+template<typename T>
+void SpaceRoute<T>::setWaypoint(int index, T &data) {
+    Node<T>* current = getWaypoint(index);
+    if (current != nullptr) {
+        current -> data = data;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
