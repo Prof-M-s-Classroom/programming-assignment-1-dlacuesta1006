@@ -19,6 +19,7 @@ public:
 };
 
 
+
 template <typename T>
 SpaceRoute<T>::~SpaceRoute() {
     Node<T>* current = head;
